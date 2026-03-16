@@ -7,10 +7,7 @@
   <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-compatible-purple.svg" alt="MCP Compatible"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <a href="https://github.com/sponsors/gregario"><img src="https://img.shields.io/badge/sponsor-♥-ea4aaa.svg" alt="Sponsor"></a>
-</p>
-
-<p align="center">
-  <a href="https://glama.ai/mcp/servers/gregario/3dprint-oracle"><img src="https://glama.ai/mcp/servers/gregario/3dprint-oracle/badges/card.svg" alt="3dprint-oracle MCP server"></a>
+  <a href="https://glama.ai/mcp/servers/gregario/3dprint-oracle"><img src="https://glama.ai/mcp/servers/gregario/3dprint-oracle/badges/score.svg" alt="3dprint-oracle MCP server"></a>
 </p>
 
 # 3dprint-oracle
