@@ -3,6 +3,7 @@ import type Database from 'better-sqlite3';
 import { z } from 'zod';
 import {
   getMaterialProfile,
+  getAvailableMaterialNames,
   type MaterialProfileRow,
 } from '../data/db.js';
 
@@ -39,7 +40,7 @@ export function registerCompareMaterials(
             content: [
               {
                 type: 'text' as const,
-                text: `Material "${name}" not found. Cannot compare.`,
+                text: `Material "${name}" not found. Cannot compare. Available materials: ${getAvailableMaterialNames(db).join(', ')}`,
               },
             ],
           };

@@ -31,7 +31,7 @@ export function registerDiagnosePrintIssue(
       },
     },
     async ({ symptom, material }) => {
-      const entries = getTroubleshooting(db, symptom, material);
+      const entries = getTroubleshooting(db, symptom.toLowerCase(), material);
 
       if (entries.length === 0) {
         const available = getAvailableSymptoms(db);
