@@ -18,6 +18,7 @@ import { registerDiagnosePrintIssue } from './tools/diagnose-print-issue.js';
 
 export interface ServerOptions {
   dbPath?: string;
+  db?: import('better-sqlite3').Database;
 }
 
 export function createServer(options?: ServerOptions): McpServer {
@@ -37,7 +38,7 @@ export function createServer(options?: ServerOptions): McpServer {
     version,
   });
 
-  const db = getDatabase(options?.dbPath);
+  const db = options?.db ?? getDatabase(options?.dbPath);
 
   registerSearchFilaments(server, db);
   registerGetFilament(server, db);
