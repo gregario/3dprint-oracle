@@ -13,6 +13,8 @@
 
 3D printing filament and materials knowledge MCP server. Gives LLMs authoritative access to 7,000+ filaments and curated material science knowledge.
 
+[![3dprint-oracle MCP server](https://glama.ai/mcp/servers/gregario/3dprint-oracle/badges/card.svg)](https://glama.ai/mcp/servers/gregario/3dprint-oracle)
+
 ## Features
 
 - **7,000+ filaments** from SpoolmanDB (53 manufacturers, 33 material types)
