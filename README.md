@@ -9,6 +9,10 @@
   <a href="https://github.com/sponsors/gregario"><img src="https://img.shields.io/badge/sponsor-♥-ea4aaa.svg" alt="Sponsor"></a>
 </p>
 
+<p align="center">
+  <a href="https://glama.ai/mcp/servers/gregario/3dprint-oracle"><img src="https://glama.ai/mcp/servers/gregario/3dprint-oracle/badges/card.svg" alt="3dprint-oracle MCP server"></a>
+</p>
+
 # 3dprint-oracle
 
 3D printing filament and materials knowledge MCP server. Gives LLMs authoritative access to 7,000+ filaments and curated material science knowledge.
