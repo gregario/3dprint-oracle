@@ -1,0 +1,11 @@
+{
+  "version": "0.1.0",
+  "tools_count": 8,
+  "tests_count": 92,
+  "npm": { "published": false },
+  "glama": { "listed": false },
+  "mcp_registry": { "registered": false },
+  "awesome_mcp_servers": { "pr_submitted": false },
+  "github": { "release_tag": null, "sponsor_enabled": false },
+  "ci": { "oidc_publishing": false }
+}
