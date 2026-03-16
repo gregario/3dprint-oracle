@@ -85,4 +85,26 @@ function seedTestData(db: Database.Database): void {
     'Bambu Lab PLA Basic Red 2.85',
     1, 1, 'PLA', 1.24, 2.85, 1000, 220, 190, 230, 60, 'Red', 'FF0000',
   );
+
+  // Seed material profiles
+  const insertProfile = db.prepare(
+    `INSERT INTO material_profiles (material_name, print_temp_min, print_temp_max, bed_temp_min, bed_temp_max, strength, flexibility, uv_resistance, food_safe, moisture_sensitivity, difficulty, typical_uses, pros, cons, nozzle_notes, enclosure_needed)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  );
+
+  insertProfile.run('PLA', 190, 220, 20, 60, 'moderate', 'low', 'poor', 'conditionally (FDA-approved base, but printing creates porous surface)', 'low', 'beginner', 'Prototyping, decorative items, figurines', 'Easy to print, low warping, biodegradable', 'Low heat resistance (~60°C), brittle', 'Any standard brass nozzle', 0);
+  insertProfile.run('PETG', 220, 250, 70, 80, 'good', 'moderate', 'moderate', 'not food safe (prints)', 'moderate', 'beginner-intermediate', 'Functional parts, outdoor items', 'Strong, chemical resistant, good layer adhesion', 'Stringing prone, scratches easily', 'Any standard brass nozzle', 0);
+  insertProfile.run('ABS', 220, 250, 95, 110, 'good', 'moderate', 'moderate', 'not food safe', 'low', 'intermediate', 'Enclosures, mechanical parts', 'Impact resistant, heat resistant (~100°C), sandable', 'Warps badly, fumes, needs enclosure', 'Any standard brass nozzle', 1);
+
+  // Seed troubleshooting
+  const insertTrouble = db.prepare(
+    `INSERT INTO troubleshooting (symptom, material_name, cause, fix, probability) VALUES (?, ?, ?, ?, ?)`,
+  );
+
+  insertTrouble.run('stringing', null, 'Print temperature too high', 'Lower nozzle temperature by 5°C increments', 'high');
+  insertTrouble.run('stringing', null, 'Insufficient retraction', 'Increase retraction distance and speed', 'high');
+  insertTrouble.run('stringing', 'PETG', 'PETG is inherently stringy', 'Use lower temps (220-230°C), enable coasting', 'high');
+  insertTrouble.run('warping', null, 'Insufficient bed adhesion', 'Clean bed with IPA, use adhesive', 'high');
+  insertTrouble.run('warping', 'ABS', 'ABS contracts significantly when cooling', 'Use enclosure, set bed to 100-110°C', 'high');
+  insertTrouble.run('poor layer adhesion', null, 'Print temperature too low', 'Increase nozzle temperature by 5°C', 'high');
 }
