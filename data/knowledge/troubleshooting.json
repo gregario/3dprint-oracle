@@ -1,0 +1,226 @@
+[
+  {
+    "symptom": "stringing",
+    "material_name": null,
+    "cause": "Print temperature too high",
+    "fix": "Lower nozzle temperature by 5°C increments until stringing stops. Run a temperature tower test to find the optimal value.",
+    "probability": "high"
+  },
+  {
+    "symptom": "stringing",
+    "material_name": null,
+    "cause": "Insufficient retraction",
+    "fix": "Increase retraction distance (start with 1mm for direct drive, 4-6mm for Bowden) and retraction speed (40-60mm/s). Enable 'combing' or 'avoid crossing perimeters' in slicer.",
+    "probability": "high"
+  },
+  {
+    "symptom": "stringing",
+    "material_name": null,
+    "cause": "Travel speed too low",
+    "fix": "Increase travel speed to 150-200mm/s so the nozzle moves quickly between points, reducing ooze time.",
+    "probability": "medium"
+  },
+  {
+    "symptom": "stringing",
+    "material_name": "PETG",
+    "cause": "PETG is inherently stringy due to its viscous melt",
+    "fix": "Use lower temps (220-230°C), enable wipe/coasting, increase retraction to 4-5mm. Some stringing is normal with PETG — use a heat gun to clean up.",
+    "probability": "high"
+  },
+  {
+    "symptom": "stringing",
+    "material_name": "TPU",
+    "cause": "TPU's flexibility makes retraction ineffective",
+    "fix": "Minimize retraction (0.5-2mm max on direct drive, avoid on Bowden). Lower temp to minimum printable range. Reduce travel distance via slicer settings.",
+    "probability": "high"
+  },
+  {
+    "symptom": "warping",
+    "material_name": null,
+    "cause": "Insufficient bed adhesion",
+    "fix": "Clean bed with IPA, apply adhesive (glue stick, hairspray), ensure proper first layer squish. Level the bed carefully.",
+    "probability": "high"
+  },
+  {
+    "symptom": "warping",
+    "material_name": null,
+    "cause": "Uneven cooling causes differential contraction",
+    "fix": "Use a brim (5-10mm) to increase bed contact area. Reduce part cooling fan speed for the first 3-5 layers. Avoid drafts near the printer.",
+    "probability": "high"
+  },
+  {
+    "symptom": "warping",
+    "material_name": null,
+    "cause": "Bed temperature too low or cooling too fast",
+    "fix": "Increase bed temperature by 5-10°C. Slow down first layer speed to 20mm/s for better adhesion.",
+    "probability": "medium"
+  },
+  {
+    "symptom": "warping",
+    "material_name": "ABS",
+    "cause": "ABS contracts significantly when cooling, causing corners to lift",
+    "fix": "Use enclosure (mandatory for ABS), set bed to 100-110°C, disable part cooling fan entirely, use wide brim or raft. ABS slurry (ABS dissolved in acetone) on the bed helps.",
+    "probability": "high"
+  },
+  {
+    "symptom": "warping",
+    "material_name": "Nylon",
+    "cause": "Nylon shrinks significantly during cooling",
+    "fix": "Use enclosure, apply PVA glue stick to bed, set bed to 70-90°C, use raft for large prints. Ensure filament is completely dry before printing.",
+    "probability": "high"
+  },
+  {
+    "symptom": "warping",
+    "material_name": "PC",
+    "cause": "Polycarbonate has high thermal contraction",
+    "fix": "Enclosure mandatory (maintain 50°C+ chamber temp). Bed at 110-120°C. Use Magigoo PC or PEI sheet. Print with raft for parts wider than 100mm.",
+    "probability": "high"
+  },
+  {
+    "symptom": "poor layer adhesion",
+    "material_name": null,
+    "cause": "Print temperature too low for material",
+    "fix": "Increase nozzle temperature by 5-10°C. Each material has a sweet spot where layers fuse well — too low causes delamination.",
+    "probability": "high"
+  },
+  {
+    "symptom": "poor layer adhesion",
+    "material_name": null,
+    "cause": "Part cooling fan too high",
+    "fix": "Reduce fan speed. Over-cooling prevents layers from bonding. For materials like ABS, ASA, and Nylon, use 0% fan or minimal fan.",
+    "probability": "high"
+  },
+  {
+    "symptom": "poor layer adhesion",
+    "material_name": null,
+    "cause": "Layer height too large for nozzle diameter",
+    "fix": "Layer height should not exceed 75% of nozzle diameter (e.g., max 0.3mm for a 0.4mm nozzle). Reduce layer height for better bonding.",
+    "probability": "medium"
+  },
+  {
+    "symptom": "poor layer adhesion",
+    "material_name": "Nylon",
+    "cause": "Moisture-absorbed Nylon produces steam that weakens layer bonds",
+    "fix": "Dry filament at 70-80°C for 6-12 hours before printing. Use a dry box during printing. Wet Nylon pops and crackles — if you hear this, stop and dry.",
+    "probability": "high"
+  },
+  {
+    "symptom": "poor layer adhesion",
+    "material_name": "PETG",
+    "cause": "PETG needs higher temps than PLA for proper fusion",
+    "fix": "Print at 235-245°C. Reduce fan to 30-50%. PETG achieves best layer adhesion at higher temps with moderate cooling.",
+    "probability": "medium"
+  },
+  {
+    "symptom": "elephant's foot",
+    "material_name": null,
+    "cause": "First layer too squished against the bed",
+    "fix": "Increase Z-offset slightly (move nozzle further from bed by 0.02-0.05mm). Calibrate first layer height with a test print.",
+    "probability": "high"
+  },
+  {
+    "symptom": "elephant's foot",
+    "material_name": null,
+    "cause": "Bed temperature too high softening the first layers",
+    "fix": "Lower bed temperature by 5-10°C. Use 'elephant foot compensation' setting in slicer (insets first layer perimeter by 0.1-0.2mm).",
+    "probability": "high"
+  },
+  {
+    "symptom": "elephant's foot",
+    "material_name": null,
+    "cause": "First layer printed too slowly allowing excess heat buildup",
+    "fix": "Increase first layer speed slightly (from 20 to 25-30mm/s) to reduce heat exposure time on the first layer.",
+    "probability": "low"
+  },
+  {
+    "symptom": "clogging",
+    "material_name": null,
+    "cause": "Heat creep — filament softens too far up in the heatbreak",
+    "fix": "Ensure hotend fan (not part cooling fan) is running at 100%. Check for dust/debris in the cooling fins. Reduce retraction distance to prevent molten filament climbing up.",
+    "probability": "high"
+  },
+  {
+    "symptom": "clogging",
+    "material_name": null,
+    "cause": "Debris or carbonized filament blocking the nozzle",
+    "fix": "Perform a cold pull (heat to printing temp, push filament through, cool to 90°C for PLA / 160°C for Nylon, then pull sharply). Repeat 3-5 times.",
+    "probability": "high"
+  },
+  {
+    "symptom": "clogging",
+    "material_name": null,
+    "cause": "Printing temperature too low causing incomplete melting",
+    "fix": "Increase nozzle temperature by 5-10°C. Ensure temperature is stable (PID tune the hotend if it fluctuates more than ±2°C).",
+    "probability": "medium"
+  },
+  {
+    "symptom": "clogging",
+    "material_name": "PVA",
+    "cause": "PVA absorbs moisture rapidly and swells, blocking the nozzle",
+    "fix": "Dry PVA at 45-50°C for 4-6 hours. Store in sealed container with desiccant at all times. Only load PVA immediately before printing.",
+    "probability": "high"
+  },
+  {
+    "symptom": "clogging",
+    "material_name": "Nylon",
+    "cause": "Wet Nylon produces steam bubbles that create jams",
+    "fix": "Dry at 70-80°C for 6-12 hours. Use inline dry box. Listen for popping/crackling — if present, filament is wet.",
+    "probability": "high"
+  },
+  {
+    "symptom": "under-extrusion",
+    "material_name": null,
+    "cause": "Extruder tension too low or extruder gear worn",
+    "fix": "Tighten extruder idler spring. Check drive gear teeth for wear — replace if teeth are rounded. Clean gear teeth of filament shavings.",
+    "probability": "high"
+  },
+  {
+    "symptom": "under-extrusion",
+    "material_name": null,
+    "cause": "Partial clog restricting flow",
+    "fix": "Perform cold pull to clear partial blockage. If persistent, replace nozzle. Check PTFE tube for deformation at the hot end.",
+    "probability": "high"
+  },
+  {
+    "symptom": "under-extrusion",
+    "material_name": null,
+    "cause": "Incorrect flow rate or E-steps",
+    "fix": "Calibrate E-steps: mark filament at 100mm, extrude 100mm, measure. Adjust steps/mm in firmware. Then fine-tune flow rate with a single-wall cube.",
+    "probability": "medium"
+  },
+  {
+    "symptom": "under-extrusion",
+    "material_name": "TPU",
+    "cause": "Flexible filament buckling between extruder gear and hotend",
+    "fix": "Use direct drive extruder (not Bowden). Print slowly (20-30mm/s). Ensure filament path has no gaps where TPU can escape sideways.",
+    "probability": "high"
+  },
+  {
+    "symptom": "over-extrusion",
+    "material_name": null,
+    "cause": "Flow rate/extrusion multiplier set too high",
+    "fix": "Reduce flow rate to 95% and test. Calibrate by printing a single-wall cube — measure wall thickness and adjust multiplier until it matches slicer line width.",
+    "probability": "high"
+  },
+  {
+    "symptom": "over-extrusion",
+    "material_name": null,
+    "cause": "Filament diameter inconsistent or thicker than expected",
+    "fix": "Measure filament diameter at 5+ points with calipers. Enter the average diameter in the slicer (default 1.75mm may not match). Variance over ±0.05mm indicates low-quality filament.",
+    "probability": "medium"
+  },
+  {
+    "symptom": "over-extrusion",
+    "material_name": null,
+    "cause": "Nozzle temperature too high causing excessive flow",
+    "fix": "Lower temperature by 5-10°C. Over-heated filament becomes too fluid and oozes excess material. Run a temperature tower to find the optimal setting.",
+    "probability": "medium"
+  },
+  {
+    "symptom": "over-extrusion",
+    "material_name": "PETG",
+    "cause": "PETG is more fluid than PLA and over-extrudes easily at default settings",
+    "fix": "Reduce flow rate to 92-95% for PETG. Lower temperature to 225-235°C. PETG is forgiving of slight under-extrusion, which actually improves surface quality.",
+    "probability": "medium"
+  }
+]

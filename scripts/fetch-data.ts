@@ -4,6 +4,7 @@
  * Usage: npx tsx scripts/fetch-data.ts
  */
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { getDatabase } from '../src/data/db.js';
 
@@ -312,10 +313,82 @@ async function main(): Promise<void> {
   });
   insertAllTx();
 
+  // ── Knowledge layer ingestion ──
+  console.error('Ingesting curated knowledge...');
+  const knowledgeDir = path.join(__dirname, '..', 'data', 'knowledge');
+
+  // Material profiles
+  const materialProfiles = JSON.parse(
+    readFileSync(path.join(knowledgeDir, 'material-profiles.json'), 'utf-8'),
+  ) as Array<Record<string, unknown>>;
+
+  db.exec('DELETE FROM material_profiles');
+
+  const insertProfile = db.prepare(`
+    INSERT INTO material_profiles (
+      material_name, print_temp_min, print_temp_max,
+      bed_temp_min, bed_temp_max, strength, flexibility,
+      uv_resistance, food_safe, moisture_sensitivity,
+      difficulty, typical_uses, pros, cons,
+      nozzle_notes, enclosure_needed
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  const insertProfilesTx = db.transaction(() => {
+    for (const p of materialProfiles) {
+      insertProfile.run(
+        p.material_name,
+        p.print_temp_min,
+        p.print_temp_max,
+        p.bed_temp_min,
+        p.bed_temp_max,
+        p.strength,
+        p.flexibility,
+        p.uv_resistance,
+        p.food_safe,
+        p.moisture_sensitivity,
+        p.difficulty,
+        p.typical_uses,
+        p.pros,
+        p.cons,
+        p.nozzle_notes ?? null,
+        p.enclosure_needed ?? 0,
+      );
+    }
+  });
+  insertProfilesTx();
+  console.error(`  ✓ ${materialProfiles.length} material profiles`);
+
+  // Troubleshooting entries
+  const troubleshooting = JSON.parse(
+    readFileSync(path.join(knowledgeDir, 'troubleshooting.json'), 'utf-8'),
+  ) as Array<Record<string, unknown>>;
+
+  db.exec('DELETE FROM troubleshooting');
+
+  const insertTroubleshooting = db.prepare(`
+    INSERT INTO troubleshooting (symptom, material_name, cause, fix, probability)
+    VALUES (?, ?, ?, ?, ?)
+  `);
+
+  const insertTroubleshootingTx = db.transaction(() => {
+    for (const t of troubleshooting) {
+      insertTroubleshooting.run(
+        t.symptom,
+        t.material_name ?? null,
+        t.cause,
+        t.fix,
+        t.probability,
+      );
+    }
+  });
+  insertTroubleshootingTx();
+  console.error(`  ✓ ${troubleshooting.length} troubleshooting entries`);
+
   db.close();
 
   console.error(
-    `Done: ${totalManufacturers} manufacturers, ${rawMaterials.length} materials, ${totalFilaments} filaments`,
+    `Done: ${totalManufacturers} manufacturers, ${rawMaterials.length} materials, ${totalFilaments} filaments, ${materialProfiles.length} profiles, ${troubleshooting.length} troubleshooting entries`,
   );
 }
 
