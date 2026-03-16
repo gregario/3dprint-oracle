@@ -3,3 +3,4 @@ dist/
 *.sqlite
 .env
 .DS_Store
+.mcpregistry_*
