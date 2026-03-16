@@ -1,0 +1,21 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "maintainers": ["gregario"],
+  "relatedServers": [
+    {
+      "name": "brewers-almanack",
+      "url": "https://glama.ai/mcp/servers/gregario/brewers-almanack",
+      "description": "Brewing knowledge MCP server"
+    },
+    {
+      "name": "lego-oracle",
+      "url": "https://glama.ai/mcp/servers/gregario/lego-oracle",
+      "description": "LEGO data MCP server"
+    },
+    {
+      "name": "mtg-oracle",
+      "url": "https://glama.ai/mcp/servers/gregario/mtg-oracle",
+      "description": "Magic: The Gathering MCP server"
+    }
+  ]
+}
