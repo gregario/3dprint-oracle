@@ -21,6 +21,10 @@
 - **8 MCP tools** — search, lookup, compare, recommend, diagnose
 - **Embedded data** — no API keys, no network calls at runtime
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/gregario-3dprint-oracle).
+
 ## Installation
 
 ### Claude Desktop
