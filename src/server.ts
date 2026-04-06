@@ -3,7 +3,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { getDatabase } from './data/db.js';
-import { readFileSync } from 'node:fs';
+import { readFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -55,7 +55,7 @@ export function createServer(options?: ServerOptions): McpServer {
 // Only start stdio when run directly
 const isMain =
   process.argv[1] &&
-  fileURLToPath(import.meta.url).includes(process.argv[1]);
+  realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   console.error('3dprint-oracle MCP server starting...');
   const server = createServer();
