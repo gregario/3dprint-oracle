@@ -1,6 +1,6 @@
 {
   "name": "3dprint-oracle",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "3D printing filament and materials knowledge MCP server",
   "type": "module",
   "main": "dist/server.js",
