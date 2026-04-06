@@ -13,6 +13,32 @@ interface ScoredMaterial {
   caveats: string[];
 }
 
+// Weights for each criterion (must sum to 100)
+const WEIGHTS = {
+  strength: 25,
+  outdoor: 20,
+  ease: 20,
+  budget: 15,
+  flexibility: 10,
+  heat: 10,
+};
+
+// Hardcoded cost tiers per material (replaces broken difficulty-as-proxy)
+const COST_TIER: Record<string, 'low' | 'medium' | 'high'> = {
+  PLA: 'low',
+  PETG: 'low',
+  ABS: 'low',
+  ASA: 'medium',
+  TPU: 'medium',
+  Nylon: 'high',
+  PC: 'high',
+  PVA: 'medium',
+};
+
+function pct(fraction: number, weight: number): number {
+  return Math.round(fraction * weight);
+}
+
 function scoreStrength(
   profile: MaterialProfileRow,
   requirement: string,
@@ -27,27 +53,56 @@ function scoreStrength(
   const reqMap: Record<string, number> = { low: 1, medium: 2, high: 4 };
   const actual = strengthMap[profile.strength] ?? 2;
   const required = reqMap[requirement] ?? 2;
-  const diff = actual - required;
-  if (diff >= 0) {
-    return { score: 2, reason: `Strength: ${profile.strength} (meets requirement)` };
+
+  let fraction: number;
+  if (actual >= required) {
+    fraction = 1.0; // meets or exceeds
+  } else if (actual >= required - 1) {
+    fraction = 0.6; // close match (e.g. "good" for "high")
+  } else if (actual >= required - 2) {
+    fraction = 0.3; // partial
+  } else {
+    fraction = 0;
   }
-  return { score: -1, reason: `Strength: ${profile.strength} (below ${requirement} requirement)` };
+
+  const pts = pct(fraction, WEIGHTS.strength);
+  const label =
+    fraction >= 1.0
+      ? 'meets requirement'
+      : fraction >= 0.6
+        ? 'close to requirement'
+        : fraction >= 0.3
+          ? 'below requirement'
+          : 'well below requirement';
+  return {
+    score: pts,
+    reason: `Strength: ${profile.strength} (${label}) [${pts}/${WEIGHTS.strength}]`,
+  };
 }
 
 function scoreFoodSafe(profile: MaterialProfileRow): { score: number; reason: string } {
   const fs = profile.food_safe.toLowerCase();
   if (fs.includes('conditionally') || fs.includes('fda')) {
-    return { score: 1, reason: `Food safety: ${profile.food_safe}` };
+    return { score: 5, reason: `Food safety: ${profile.food_safe} [+5 bonus]` };
   }
-  return { score: -2, reason: `Not food safe: ${profile.food_safe}` };
+  return { score: 0, reason: `Not food safe: ${profile.food_safe} [+0]` };
 }
 
-function scoreOutdoor(profile: MaterialProfileRow): { score: number; reason: string } {
-  const uvMap: Record<string, number> = { poor: -2, low: -1, moderate: 1, good: 2, excellent: 3 };
-  const uvScore = uvMap[profile.uv_resistance] ?? 0;
+function scoreOutdoor(
+  profile: MaterialProfileRow,
+): { score: number; reason: string } {
+  const uvMap: Record<string, number> = {
+    poor: 0,
+    low: 0.2,
+    moderate: 0.6,
+    good: 0.8,
+    excellent: 1.0,
+  };
+  const fraction = uvMap[profile.uv_resistance] ?? 0.3;
+  const pts = pct(fraction, WEIGHTS.outdoor);
   return {
-    score: uvScore,
-    reason: `UV resistance: ${profile.uv_resistance}`,
+    score: pts,
+    reason: `UV resistance: ${profile.uv_resistance} [${pts}/${WEIGHTS.outdoor}]`,
   };
 }
 
@@ -65,10 +120,149 @@ function scoreEase(
   const reqMap: Record<string, number> = { beginner: 1, intermediate: 3, advanced: 5 };
   const actual = diffMap[profile.difficulty] ?? 3;
   const required = reqMap[requirement] ?? 3;
+
+  let fraction: number;
   if (actual <= required) {
-    return { score: 2, reason: `Difficulty: ${profile.difficulty} (within skill level)` };
+    fraction = 1.0; // within skill level
+  } else if (actual <= required + 1) {
+    fraction = 0.6; // one step harder
+  } else if (actual <= required + 2) {
+    fraction = 0.3; // two steps harder
+  } else {
+    fraction = 0;
   }
-  return { score: -1, reason: `Difficulty: ${profile.difficulty} (may be challenging for ${requirement})` };
+
+  const pts = pct(fraction, WEIGHTS.ease);
+  const label =
+    fraction >= 1.0
+      ? 'within skill level'
+      : fraction >= 0.6
+        ? 'slightly above skill level'
+        : fraction >= 0.3
+          ? 'challenging for skill level'
+          : 'well above skill level';
+  return {
+    score: pts,
+    reason: `Difficulty: ${profile.difficulty} (${label}) [${pts}/${WEIGHTS.ease}]`,
+  };
+}
+
+function scoreBudget(
+  profile: MaterialProfileRow,
+  requirement: string,
+): { score: number; reason: string } {
+  const tier = COST_TIER[profile.material_name] ?? 'medium';
+  const tierVal: Record<string, number> = { low: 1, medium: 2, high: 3 };
+  const reqVal: Record<string, number> = { low: 1, medium: 2, high: 3 };
+  const actual = tierVal[tier];
+  const required = reqVal[requirement] ?? 2;
+
+  let fraction: number;
+  if (actual <= required) {
+    fraction = 1.0; // within budget
+  } else if (actual === required + 1) {
+    fraction = 0.4; // one tier over
+  } else {
+    fraction = 0;
+  }
+
+  const pts = pct(fraction, WEIGHTS.budget);
+  const label =
+    fraction >= 1.0
+      ? 'within budget'
+      : fraction > 0
+        ? 'slightly over budget'
+        : 'over budget';
+  return {
+    score: pts,
+    reason: `Cost tier: ${tier} (${label}) [${pts}/${WEIGHTS.budget}]`,
+  };
+}
+
+function scoreFlexibility(
+  profile: MaterialProfileRow,
+  requirement: string,
+): { score: number; reason: string } {
+  const flexMap: Record<string, string[]> = {
+    rigid: ['low', 'none'],
+    'semi-flexible': ['moderate', 'medium'],
+    flexible: ['high', 'very high', 'flexible'],
+  };
+  const matches = flexMap[requirement] ?? [];
+  const isMatch = matches.includes(profile.flexibility.toLowerCase());
+
+  let fraction: number;
+  if (isMatch) {
+    fraction = 1.0;
+  } else {
+    // Partial credit for adjacent flexibility
+    const order = ['rigid', 'semi-flexible', 'flexible'];
+    const reqIdx = order.indexOf(requirement);
+    // Determine which bucket the profile falls into
+    let actualIdx = -1;
+    for (let i = 0; i < order.length; i++) {
+      const bucket = flexMap[order[i]] ?? [];
+      if (bucket.includes(profile.flexibility.toLowerCase())) {
+        actualIdx = i;
+        break;
+      }
+    }
+    const distance = actualIdx >= 0 && reqIdx >= 0 ? Math.abs(actualIdx - reqIdx) : 2;
+    fraction = distance === 1 ? 0.3 : 0;
+  }
+
+  const pts = pct(fraction, WEIGHTS.flexibility);
+  const label = fraction >= 1.0 ? 'matches' : fraction > 0 ? 'partial match' : "doesn't match";
+  return {
+    score: pts,
+    reason: `Flexibility: ${profile.flexibility} (${label} ${requirement}) [${pts}/${WEIGHTS.flexibility}]`,
+  };
+}
+
+function scoreHeatResistance(
+  profile: MaterialProfileRow,
+  requirement: string,
+): { score: number; reason: string; caveat?: string } {
+  // Use enclosure_needed and print temp as proxy for heat resistance capability
+  let fraction: number;
+  let label: string;
+  let caveat: string | undefined;
+
+  if (requirement === 'high') {
+    if (profile.enclosure_needed) {
+      fraction = 1.0;
+      label = 'high heat resistance (needs enclosure)';
+    } else if ((profile.print_temp_max ?? 0) >= 240) {
+      fraction = 0.6;
+      label = 'moderate-high heat resistance';
+    } else {
+      fraction = 0.2;
+      label = 'limited heat resistance';
+      caveat = profile.cons;
+    }
+  } else if (requirement === 'medium') {
+    if (profile.enclosure_needed || (profile.print_temp_max ?? 0) >= 240) {
+      fraction = 1.0;
+      label = 'meets medium heat requirement';
+    } else if ((profile.print_temp_max ?? 0) >= 210) {
+      fraction = 0.6;
+      label = 'adequate heat resistance';
+    } else {
+      fraction = 0.3;
+      label = 'marginal heat resistance';
+    }
+  } else {
+    // low requirement — everything passes
+    fraction = 1.0;
+    label = 'meets low heat requirement';
+  }
+
+  const pts = pct(fraction, WEIGHTS.heat);
+  return {
+    score: pts,
+    reason: `Heat resistance: ${label} [${pts}/${WEIGHTS.heat}]`,
+    caveat,
+  };
 }
 
 export function registerRecommendMaterial(
@@ -144,32 +338,17 @@ export function registerRecommendMaterial(
         }
 
         if (requirements.flexibility) {
-          const flexMap: Record<string, string[]> = {
-            rigid: ['low', 'none'],
-            'semi-flexible': ['moderate', 'medium'],
-            flexible: ['high', 'very high', 'flexible'],
-          };
-          const matches = flexMap[requirements.flexibility] ?? [];
-          if (matches.includes(profile.flexibility.toLowerCase())) {
-            score += 2;
-            reasons.push(`Flexibility: ${profile.flexibility} (matches)`);
-          } else {
-            score -= 1;
-            reasons.push(`Flexibility: ${profile.flexibility} (doesn't match ${requirements.flexibility})`);
-          }
+          const r = scoreFlexibility(profile, requirements.flexibility);
+          score += r.score;
+          reasons.push(r.reason);
         }
 
         if (requirements.heat_resistance) {
-          if (requirements.heat_resistance === 'high' && profile.enclosure_needed) {
-            score += 2;
-            reasons.push('High heat resistance (needs enclosure)');
-          } else if (requirements.heat_resistance === 'high') {
-            score -= 1;
-            reasons.push('Limited heat resistance');
-            caveats.push(profile.cons);
-          } else {
-            score += 1;
-            reasons.push(`Heat resistance: suitable for ${requirements.heat_resistance} needs`);
+          const r = scoreHeatResistance(profile, requirements.heat_resistance);
+          score += r.score;
+          reasons.push(r.reason);
+          if (r.caveat) {
+            caveats.push(r.caveat);
           }
         }
 
@@ -177,7 +356,7 @@ export function registerRecommendMaterial(
           const r = scoreFoodSafe(profile);
           score += r.score;
           reasons.push(r.reason);
-          if (r.score < 0) {
+          if (r.score === 0) {
             caveats.push('Not suitable for food contact');
           }
         }
@@ -186,7 +365,7 @@ export function registerRecommendMaterial(
           const r = scoreOutdoor(profile);
           score += r.score;
           reasons.push(r.reason);
-          if (r.score < 0) {
+          if (r.score <= pct(0.2, WEIGHTS.outdoor)) {
             caveats.push('Poor outdoor durability');
           }
         }
@@ -198,16 +377,9 @@ export function registerRecommendMaterial(
         }
 
         if (requirements.budget) {
-          if (requirements.budget === 'low' && profile.difficulty === 'beginner') {
-            score += 1;
-            reasons.push('Budget-friendly (common beginner material)');
-          } else if (requirements.budget === 'low') {
-            score -= 1;
-            reasons.push('May be more expensive than basic materials');
-          } else {
-            score += 1;
-            reasons.push('Within budget range');
-          }
+          const r = scoreBudget(profile, requirements.budget);
+          score += r.score;
+          reasons.push(r.reason);
         }
 
         return { profile, score, reasons, caveats };
