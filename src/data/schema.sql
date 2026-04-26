@@ -39,19 +39,33 @@ CREATE TABLE IF NOT EXISTS filaments (
   glow INTEGER DEFAULT 0
 );
 
--- FTS5 for filament search
+-- FTS5 for filament search.
+-- Indexed columns cover the user-meaningful free-text fields. We deliberately
+-- DO NOT use content='filaments' here because manufacturer_name lives in a
+-- separate table — the trigger denormalizes it on insert.
 CREATE VIRTUAL TABLE IF NOT EXISTS filaments_fts USING fts5(
   name,
+  manufacturer_name,
+  material_name,
   color_name,
-  content='filaments',
-  content_rowid='id',
+  finish,
   tokenize='porter unicode61'
 );
 
--- Triggers to keep FTS in sync
+-- Trigger to keep FTS in sync. Looks up manufacturer_name via subquery so a
+-- plain INSERT INTO filaments populates the FTS row correctly. fetch-data
+-- bypasses the trigger by dropping/repopulating filaments_fts in bulk for
+-- speed; this trigger is the correctness path for tests and ad-hoc inserts.
 CREATE TRIGGER IF NOT EXISTS filaments_ai AFTER INSERT ON filaments BEGIN
-  INSERT INTO filaments_fts(rowid, name, color_name)
-  VALUES (new.id, new.name, new.color_name);
+  INSERT INTO filaments_fts(rowid, name, manufacturer_name, material_name, color_name, finish)
+  VALUES (
+    new.id,
+    new.name,
+    (SELECT name FROM manufacturers WHERE id = new.manufacturer_id),
+    new.material_name,
+    new.color_name,
+    new.finish
+  );
 END;
 
 -- Material profiles (curated knowledge layer)

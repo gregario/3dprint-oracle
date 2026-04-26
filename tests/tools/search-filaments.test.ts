@@ -79,6 +79,39 @@ describe('search_filaments', () => {
     expect(text2).toContain('7');
   });
 
+  it('matches manufacturer + material in a single query (regression: FINDING-001)', async () => {
+    // Free-text "Bambu PLA" must hit Bambu Lab PLA filaments without users
+    // having to use the explicit `manufacturer` and `material` filters. The
+    // FTS index originally only covered name + color_name, so a query
+    // spanning manufacturer and material returned zero results.
+    const result = await client.callTool({
+      name: 'search_filaments',
+      arguments: { query: 'Bambu PLA' },
+    });
+    expect(result.isError).toBeFalsy();
+    const text = (result.content as { type: string; text: string }[])[0].text;
+    // Test seed has 2 Bambu Lab PLAs ("Bambu Lab PLA Basic Red", "Bambu Lab
+    // PLA Basic Blue") plus the 2.85 variant — so >=2 hits in the test fixture.
+    // The real bundled DB has ~131. The regression bar is "non-zero results".
+    expect(text).toContain('Bambu Lab');
+    expect(text).toContain('PLA');
+    expect(text).not.toContain('PETG');
+  });
+
+  it('still matches single-token color queries (no regression on FTS)', async () => {
+    // Multi-column FTS5 indexes split MATCH terms across all columns by
+    // default — but a single token must still hit color_name. This covers
+    // "Bambu Green"-style queries where Green is a color, not a manufacturer.
+    const result = await client.callTool({
+      name: 'search_filaments',
+      arguments: { query: 'Bambu Red' },
+    });
+    expect(result.isError).toBeFalsy();
+    const text = (result.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain('Bambu Lab');
+    expect(text).toContain('Red');
+  });
+
   it('returns isError when no results found', async () => {
     const result = await client.callTool({
       name: 'search_filaments',
