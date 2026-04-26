@@ -198,16 +198,59 @@ describe.skipIf(!HAS_DATA)('integration: real SpoolmanDB data', () => {
     expect(text).toContain('Available symptoms');
   });
 
-  it('get_filament retrieves a filament by name', async () => {
-    const result = await client.callTool({
+  it('get_filament returns disambiguation for ambiguous name and resolves with manufacturer+material', async () => {
+    // "Natural" is shared across many manufacturers and materials in
+    // SpoolmanDB, so a bare name lookup must surface a disambiguation list
+    // rather than silently picking an arbitrary row.
+    const ambiguous = await client.callTool({
       name: 'get_filament',
       arguments: { name: 'Natural' },
     });
-    expect(result.isError).toBeFalsy();
-    const text = (result.content[0] as { type: string; text: string }).text;
-    expect(text).toContain('Natural');
-    expect(text).toContain('Manufacturer:');
-    expect(text).toContain('Material:');
-    expect(text).toContain('Diameter:');
+    expect(ambiguous.isError).toBeTruthy();
+    const ambiguousText = (
+      ambiguous.content[0] as { type: string; text: string }
+    ).text;
+    expect(ambiguousText).toContain('Multiple filaments match');
+    expect(ambiguousText).toContain('[ID');
+
+    // Pull the first ID out of the disambiguation list and round-trip it.
+    const idMatch = ambiguousText.match(/\[ID\s+(\d+)\]/);
+    expect(idMatch).not.toBeNull();
+    const id = Number(idMatch![1]);
+    const byId = await client.callTool({
+      name: 'get_filament',
+      arguments: { id },
+    });
+    expect(byId.isError).toBeFalsy();
+    const byIdText = (byId.content[0] as { type: string; text: string }).text;
+    expect(byIdText).toContain('Manufacturer:');
+    expect(byIdText).toContain('Material:');
+    expect(byIdText).toContain('Diameter:');
+  });
+
+  it('search_filaments → get_filament round-trip works against real data', async () => {
+    // QA agent reproduction: search for a Bambu PLA filament, copy the [ID]
+    // out of the search result, and pass it directly to get_filament.
+    const search = await client.callTool({
+      name: 'search_filaments',
+      arguments: { query: '', manufacturer: 'Bambu Lab', material: 'PLA' },
+    });
+    expect(search.isError).toBeFalsy();
+    const searchText = (search.content[0] as { type: string; text: string })
+      .text;
+    expect(searchText).toMatch(/\[ID\s+\d+\]/);
+
+    const idMatch = searchText.match(/\[ID\s+(\d+)\]/);
+    expect(idMatch).not.toBeNull();
+    const id = Number(idMatch![1]);
+
+    const detail = await client.callTool({
+      name: 'get_filament',
+      arguments: { id },
+    });
+    expect(detail.isError).toBeFalsy();
+    const detailText = (detail.content[0] as { type: string; text: string })
+      .text;
+    expect(detailText).toContain(`ID: ${id}`);
   });
 });

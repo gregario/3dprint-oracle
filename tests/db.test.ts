@@ -6,6 +6,7 @@ import {
   searchFilaments,
   getFilamentById,
   getFilamentByName,
+  findFilamentsByName,
   listManufacturers,
   listMaterials,
   getMaterialProfile,
@@ -99,6 +100,33 @@ describe('query helpers', () => {
   it('getFilamentByName returns null for missing name', () => {
     const filament = getFilamentByName(db, 'Nonexistent');
     expect(filament).toBeNull();
+  });
+
+  it('findFilamentsByName returns all rows matching the name', () => {
+    // Seed an extra row sharing a name with an existing filament so we can
+    // verify ambiguous-name lookups return every match (the bug surfaced by
+    // fleet QA was a silent one-of-many pick).
+    db.prepare(
+      `INSERT INTO filaments (name, manufacturer_id, material_id, material_name, density, diameter, weight, extruder_temp, bed_temp, color_name, color_hex)
+       VALUES ('Shared Name', 1, 1, 'PLA', 1.24, 1.75, 1000, 210, 60, 'Shared Name', '#abc')`,
+    ).run();
+    db.prepare(
+      `INSERT INTO filaments (name, manufacturer_id, material_id, material_name, density, diameter, weight, extruder_temp, bed_temp, color_name, color_hex)
+       VALUES ('Shared Name', 2, 2, 'PETG', 1.27, 1.75, 1000, 230, 80, 'Shared Name', '#abc')`,
+    ).run();
+    const matches = findFilamentsByName(db, 'Shared Name');
+    expect(matches.length).toBe(2);
+    const filtered = findFilamentsByName(db, 'Shared Name', 'Hatchbox');
+    expect(filtered.length).toBe(1);
+    expect(filtered[0].manufacturer_name).toBe('Hatchbox');
+    const byMaterial = findFilamentsByName(
+      db,
+      'Shared Name',
+      undefined,
+      'PETG',
+    );
+    expect(byMaterial.length).toBe(1);
+    expect(byMaterial[0].material_name).toBe('PETG');
   });
 
   it('listManufacturers returns all with counts', () => {

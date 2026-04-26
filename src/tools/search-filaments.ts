@@ -5,8 +5,11 @@ import { searchFilaments, type FilamentRow } from '../data/db.js';
 
 function formatFilament(f: FilamentRow): string {
   const lines: string[] = [];
-  lines.push(`- ${f.name}`);
-  lines.push(`  Manufacturer: ${f.manufacturer_name} | Material: ${f.material_name}`);
+  // Show ID prominently — it is the unambiguous lookup key for get_filament.
+  // The `name` field in SpoolmanDB is often just the colour (e.g. "Jade White")
+  // and is shared across manufacturers and materials, so the full label below
+  // is for human reading; the ID is what get_filament should be called with.
+  lines.push(`- [ID ${f.id}] ${f.manufacturer_name} — ${f.material_name} — ${f.name}`);
 
   const tempParts: string[] = [];
   if (f.extruder_temp != null) {
@@ -40,7 +43,7 @@ export function registerSearchFilaments(
     {
       title: 'Search Filaments',
       description:
-        'Search 7,000+ 3D printing filaments by name, material type, manufacturer, or color. Returns filament specs including print temperatures, density, and available colors.',
+        'Search 7,000+ 3D printing filaments by name, material type, manufacturer, or color. Each result is prefixed with [ID <n>] — pass that ID to get_filament for full specs (the ID is the only unambiguous lookup key, since many filaments share names like "Black" or "Jade White").',
       inputSchema: {
         query: z
           .string()
@@ -96,7 +99,7 @@ export function registerSearchFilaments(
       const showing = result.rows.length;
       const lines: string[] = [];
       lines.push(
-        `Found ${result.total} result${result.total === 1 ? '' : 's'}. Showing ${offset + 1}-${offset + showing} of ${result.total}:\n`,
+        `Found ${result.total} result${result.total === 1 ? '' : 's'}. Showing ${offset + 1}-${offset + showing} of ${result.total}. Use the [ID] from any row with get_filament for full details.\n`,
       );
 
       for (const row of result.rows) {
