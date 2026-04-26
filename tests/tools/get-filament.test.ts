@@ -19,6 +19,30 @@ describe('get_filament', () => {
     expect(text).not.toContain('Not implemented');
   });
 
+  it('gets filament by ID passed as a numeric string (LLM client coercion)', async () => {
+    // Tool description advertises "ID" — many LLM clients serialise numeric
+    // arguments as strings ("1" rather than 1). The schema must accept both.
+    const result = await client.callTool({
+      name: 'get_filament',
+      arguments: { id: '1' as unknown as number },
+    });
+    const text = (result.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain('Bambu Lab PLA Basic Red');
+    expect(result.isError).not.toBe(true);
+  });
+
+  it('rejects non-numeric string IDs cleanly', async () => {
+    const result = await client.callTool({
+      name: 'get_filament',
+      arguments: { id: 'not-a-number' as unknown as number },
+    });
+    // Either Zod validation rejects (preferred) or tool returns isError.
+    // Both are acceptable; what matters is no silent success.
+    if (!result.isError) {
+      throw new Error('expected error for non-numeric id');
+    }
+  });
+
   it('gets filament by name', async () => {
     const result = await client.callTool({
       name: 'get_filament',

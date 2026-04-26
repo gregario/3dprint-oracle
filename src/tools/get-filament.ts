@@ -119,10 +119,16 @@ export function registerGetFilament(
         'Get detailed information about a specific filament. Prefer lookup by ID (the [ID <n>] value returned by search_filaments) — that is the only unambiguous key. Name lookups are accepted but many filaments share the same name (e.g. "Black", "Jade White") because SpoolmanDB names are often colour-only; if a name is ambiguous you will get back a disambiguation list with IDs. You can pass `manufacturer` and `material` alongside `name` to narrow the match, or pass the full search_filaments display label (e.g. "[ID 1234] Bambu Lab — PLA — Jade White") in the `name` field and it will be parsed.',
       inputSchema: {
         id: z
-          .number()
+          .union([
+            z.number().int().nonnegative(),
+            z
+              .string()
+              .regex(/^\d+$/, 'id must be a non-negative integer')
+              .transform((s) => Number.parseInt(s, 10)),
+          ])
           .optional()
           .describe(
-            'Filament ID (preferred — copy the [ID N] value from search_filaments).',
+            'Filament ID (preferred — copy the [ID N] value from search_filaments). Accepts either a number or a numeric string (LLM clients often serialise IDs as strings).',
           ),
         name: z
           .string()
