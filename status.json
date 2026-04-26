@@ -5,7 +5,7 @@
   "npm": { "published": true, "version": "0.1.0" },
   "glama": { "listed": true, "ownership_claimed": true },
   "mcp_registry": { "registered": true, "mcp_name": "io.github.gregario/3dprint-oracle" },
-  "awesome_mcp_servers": { "pr_submitted": false },
+  "awesome_mcp_servers": { "pr_submitted": true, "pr_url": "https://github.com/punkpeye/awesome-mcp-servers/pull/3312", "merged": true },
   "github": { "release_tag": "v0.1.0", "sponsor_enabled": false },
   "ci": { "oidc_publishing": false }
 }
