@@ -21,6 +21,10 @@ Read both stack profiles before writing any code.
 
 Filament data from SpoolmanDB (github.com/Donkie/SpoolmanDB, MIT license).
 
+## Data File
+
+`src/data/3dprint.sqlite` is **tracked in git** (~1.4 MB) for Glama auto-rebuild compatibility. Glama clones the repo and runs the build inside its container — gitignored data files would not exist there, so the listing would show zero tools. Refresh the database via `npm run fetch-data` before publishing a new release.
+
 ## Engineering
 
 Uses Superpowers for engineering execution. Follow TDD workflow: write tests first, then implement.
