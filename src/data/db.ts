@@ -175,6 +175,32 @@ export function getFilamentByName(
   return row ?? null;
 }
 
+/**
+ * Find filaments by name, optionally filtered by manufacturer and material.
+ * Names in SpoolmanDB are often colour-only (e.g. "Jade White") and shared
+ * across manufacturers/materials, so a plain name lookup is ambiguous.
+ * Returns ALL matches so callers can disambiguate.
+ */
+export function findFilamentsByName(
+  db: Database.Database,
+  name: string,
+  manufacturer?: string,
+  material?: string,
+): FilamentRow[] {
+  const conditions: string[] = ['f.name = ?'];
+  const params: (string | number)[] = [name];
+  if (manufacturer) {
+    conditions.push('m.name = ?');
+    params.push(manufacturer);
+  }
+  if (material) {
+    conditions.push('f.material_name = ?');
+    params.push(material);
+  }
+  const sql = `${FILAMENT_BASE_SELECT} WHERE ${conditions.join(' AND ')} ORDER BY f.id`;
+  return db.prepare(sql).all(...params) as FilamentRow[];
+}
+
 export interface ManufacturerRow {
   id: number;
   name: string;

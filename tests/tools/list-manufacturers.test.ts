@@ -28,9 +28,10 @@ describe('list_manufacturers', () => {
       arguments: {},
     });
     const text = (result.content as { type: string; text: string }[])[0].text;
-    // Bambu Lab has 4 filaments, Prusament has 3
+    // Bambu Lab has 6 filaments, Prusament has 4 (after seeding ambiguous
+    // colour-only names that mirror the real SpoolmanDB shape).
+    expect(text).toContain('6');
     expect(text).toContain('4');
-    expect(text).toContain('3');
   });
 
   it('filters by material type', async () => {

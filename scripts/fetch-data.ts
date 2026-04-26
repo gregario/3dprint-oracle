@@ -224,10 +224,18 @@ async function main(): Promise<void> {
   console.error('Opening database...');
   const db = getDatabase(dataDir);
 
-  // Clear existing data (order matters for foreign keys)
+  // Migration-safe rebuild: drop the FTS table + trigger before clearing data.
+  // schema.sql uses CREATE ... IF NOT EXISTS, so any pre-existing FTS table
+  // with the old column set would silently survive a schema re-run. Dropping
+  // them forces re-creation with the current schema columns.
+  db.exec('DROP TRIGGER IF EXISTS filaments_ai');
+  db.exec('DROP TABLE IF EXISTS filaments_fts');
   db.exec('DELETE FROM filaments');
   db.exec('DELETE FROM manufacturers');
   db.exec('DELETE FROM materials');
+  // Re-run schema to recreate the FTS table + trigger with current columns.
+  const schemaPath = path.join(dataDir, 'schema.sql');
+  db.exec(readFileSync(schemaPath, 'utf-8'));
 
   // Insert materials
   const insertMaterial = db.prepare(

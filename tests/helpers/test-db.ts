@@ -86,6 +86,22 @@ function seedTestData(db: Database.Database): void {
     1, 1, 'PLA', 1.24, 2.85, 1000, 220, 190, 230, 60, 'Red', 'FF0000',
   );
 
+  // Mirror real SpoolmanDB shape: name is just the colour. These rows cause
+  // ambiguity on plain-name lookups and exercise the disambiguation path.
+  // "Jade White" appears under both manufacturers; "Solid Black" is unique.
+  insert.run(
+    'Jade White',
+    1, 1, 'PLA', 1.24, 1.75, 1000, 220, 190, 230, 60, 'Jade White', 'F6F6F6',
+  );
+  insert.run(
+    'Jade White',
+    2, 1, 'PLA', 1.24, 1.75, 1000, 215, 200, 220, 55, 'Jade White', 'F6F6F6',
+  );
+  insert.run(
+    'Solid Black',
+    1, 1, 'PLA', 1.24, 1.75, 1000, 220, 190, 230, 60, 'Solid Black', '000000',
+  );
+
   // Seed material profiles
   const insertProfile = db.prepare(
     `INSERT INTO material_profiles (material_name, print_temp_min, print_temp_max, bed_temp_min, bed_temp_max, strength, flexibility, uv_resistance, food_safe, moisture_sensitivity, difficulty, typical_uses, pros, cons, nozzle_notes, enclosure_needed)
