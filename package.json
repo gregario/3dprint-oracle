@@ -32,6 +32,14 @@
     "fdm"
   ],
   "mcpName": "io.github.gregario/3dprint-oracle",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gregario/3dprint-oracle.git"
+  },
+  "homepage": "https://github.com/gregario/3dprint-oracle#readme",
+  "bugs": {
+    "url": "https://github.com/gregario/3dprint-oracle/issues"
+  },
   "author": "gregario",
   "license": "MIT",
   "dependencies": {

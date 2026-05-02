@@ -6,12 +6,12 @@
     "url": "https://github.com/gregario/3dprint-oracle",
     "source": "github"
   },
-  "version": "0.1.0",
+  "version": "0.1.2",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "3dprint-oracle",
-      "version": "0.1.0",
+      "version": "0.1.2",
       "transport": {
         "type": "stdio"
       }
